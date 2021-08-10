@@ -1,0 +1,6 @@
+name: 'Docrunner Action'
+description: 'Installs the docrunner cli tool on your github hosted runner'
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
