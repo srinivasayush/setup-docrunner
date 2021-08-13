@@ -6,6 +6,25 @@
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -44,13 +63,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var install_1 = __nccwpck_require__(611);
+var core = __importStar(__nccwpck_require__(186));
 var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, install_1.installAndAddToPath()];
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, install_1.installAndAddToPath()];
             case 1:
                 _a.sent();
-                return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 2:
+                error_1 = _a.sent();
+                core.setFailed(error_1.message);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); };
@@ -119,21 +147,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.installAndAddToPath = void 0;
-var tc = __importStar(__nccwpck_require__(784));
 var version_1 = __nccwpck_require__(970);
-var core_1 = __importDefault(__nccwpck_require__(186));
+var path = __importStar(__nccwpck_require__(622));
+var os = __importStar(__nccwpck_require__(87));
+var tc = __importStar(__nccwpck_require__(784));
+var core = __importStar(__nccwpck_require__(186));
 var installAndAddToPath = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var docrunnerVersion, docrunnerLocation;
+    var docrunnerVersion, cachedPath, docrunnerLocation, docrunnerParentFolder, newCachedPath, docrunnerInstallRoot;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, version_1.getVersion()];
+            case 0: return [4 /*yield*/, version_1.getLatestVersion()];
             case 1:
                 docrunnerVersion = _a.sent();
+                cachedPath = tc.find('docrunner', docrunnerVersion);
+                if (cachedPath) {
+                    core.info("Using cached Docrunner installation from " + cachedPath + ".");
+                    core.addPath(cachedPath);
+                    return [2 /*return*/];
+                }
                 docrunnerLocation = '';
                 if (!(process.platform === 'win32')) return [3 /*break*/, 3];
                 return [4 /*yield*/, tc.downloadTool("https://github.com/DudeBro249/docrunner/releases/download/" + docrunnerVersion + "/docrunner-windows.exe")];
@@ -154,10 +187,18 @@ var installAndAddToPath = function () { return __awaiter(void 0, void 0, void 0,
                 docrunnerLocation = _a.sent();
                 _a.label = 7;
             case 7:
-                if (docrunnerLocation.length > 0) {
-                    core_1.default.addPath(docrunnerLocation);
-                }
-                return [2 /*return*/, docrunnerLocation];
+                docrunnerParentFolder = path.dirname(docrunnerLocation);
+                core.info("Docrunner's location is: " + docrunnerLocation);
+                core.info("Docrunner's parent folder is: " + docrunnerParentFolder);
+                return [4 /*yield*/, tc.cacheDir(docrunnerParentFolder, 'docrunner', docrunnerVersion)];
+            case 8:
+                newCachedPath = _a.sent();
+                core.info("Cached Docrunner to " + newCachedPath + ".");
+                core.addPath(newCachedPath);
+                docrunnerInstallRoot = process.env.DOCRUNNER_INSTALL_ROOT ||
+                    path.join(os.homedir(), '.docrunner', 'bin');
+                core.addPath(docrunnerInstallRoot);
+                return [2 /*return*/];
         }
     });
 }); };
@@ -211,9 +252,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getVersion = void 0;
+exports.getLatestVersion = void 0;
 var node_fetch_1 = __importDefault(__nccwpck_require__(467));
-var getVersion = function () { return __awaiter(void 0, void 0, void 0, function () {
+var getLatestVersion = function () { return __awaiter(void 0, void 0, void 0, function () {
     var response, splitUrl, version;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -226,7 +267,7 @@ var getVersion = function () { return __awaiter(void 0, void 0, void 0, function
         }
     });
 }); };
-exports.getVersion = getVersion;
+exports.getLatestVersion = getLatestVersion;
 //# sourceMappingURL=version.js.map
 
 /***/ }),

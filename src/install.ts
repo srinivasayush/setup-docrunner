@@ -1,9 +1,19 @@
+import { getLatestVersion } from './version'
+import * as path from 'path'
+import * as os from 'os'
 import * as tc from '@actions/tool-cache'
-import { getVersion } from './version'
-import core from '@actions/core'
+import * as core from '@actions/core'
 
 const installAndAddToPath = async () => {
-    const docrunnerVersion = await getVersion()
+    const docrunnerVersion = await getLatestVersion()
+
+    const cachedPath = tc.find('docrunner', docrunnerVersion)
+    if (cachedPath) {
+        core.info(`Using cached Docrunner installation from ${cachedPath}.`)
+        core.addPath(cachedPath)
+        return
+    }
+
     let docrunnerLocation = ''
 
     if (process.platform === 'win32') {
@@ -23,11 +33,23 @@ const installAndAddToPath = async () => {
         )
     }
 
-    if (docrunnerLocation.length > 0) {
-        core.addPath(docrunnerLocation)
-    }
+    const docrunnerParentFolder = path.dirname(docrunnerLocation)
+    core.info(`Docrunner's location is: ${docrunnerLocation}`)
+    core.info(`Docrunner's parent folder is: ${docrunnerParentFolder}`)
 
-    return docrunnerLocation
+    const newCachedPath = await tc.cacheDir(
+        docrunnerParentFolder,
+        'docrunner',
+        docrunnerVersion
+    )
+
+    core.info(`Cached Docrunner to ${newCachedPath}.`)
+    core.addPath(newCachedPath)
+
+    const docrunnerInstallRoot =
+        process.env.DOCRUNNER_INSTALL_ROOT ||
+        path.join(os.homedir(), '.docrunner', 'bin')
+    core.addPath(docrunnerInstallRoot)
 }
 
 export { installAndAddToPath }
