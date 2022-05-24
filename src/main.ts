@@ -1,12 +1,12 @@
 import { installAndAddToPath } from './install'
 import * as core from '@actions/core'
 
-const main = async () => {
+const run = async () => {
     try {
         await installAndAddToPath()
-    } catch (error) {
+    } catch (error: any) {
         core.setFailed(error.message)
     }
 }
 
-main()
+run()

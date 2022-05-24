@@ -14,35 +14,19 @@ const installAndAddToPath = async () => {
         return
     }
 
-    let docrunnerLocation = ''
+    const zip = zipName()
+    const url = `https://github.com/DudeBro249/docrunner/releases/download/${docrunnerVersion}/${zip}`
 
-    if (process.platform === 'win32') {
-        // windows
-        docrunnerLocation = await tc.downloadTool(
-            `https://github.com/DudeBro249/docrunner/releases/download/${docrunnerVersion}/docrunner-windows.exe`
-        )
-    } else if (process.platform === 'darwin') {
-        // macOS
-        docrunnerLocation = await tc.downloadTool(
-            `https://github.com/DudeBro249/docrunner/releases/download/${docrunnerVersion}/docrunner-macOS`
-        )
-    } else {
-        // linux
-        docrunnerLocation = await tc.downloadTool(
-            `https://github.com/DudeBro249/docrunner/releases/download/${docrunnerVersion}/docrunner-linux`
-        )
-    }
+    core.info(`Downloading Docrunner from ${url}.`)
 
-    const docrunnerParentFolder = path.dirname(docrunnerLocation)
-    core.info(`Docrunner's location is: ${docrunnerLocation}`)
-    core.info(`Docrunner's parent folder is: ${docrunnerParentFolder}`)
+    const zipPath = await tc.downloadTool(url)
+    const extractedFolder = await tc.extractZip(zipPath)
 
     const newCachedPath = await tc.cacheDir(
-        docrunnerParentFolder,
+        extractedFolder,
         'docrunner',
         docrunnerVersion
     )
-
     core.info(`Cached Docrunner to ${newCachedPath}.`)
     core.addPath(newCachedPath)
 
@@ -50,6 +34,34 @@ const installAndAddToPath = async () => {
         process.env.DOCRUNNER_INSTALL_ROOT ||
         path.join(os.homedir(), '.docrunner', 'bin')
     core.addPath(docrunnerInstallRoot)
+}
+
+const zipName: () => string = () => {
+    let arch: string
+    switch (process.arch) {
+        case 'x64':
+            arch = 'x86_64'
+            break
+        default:
+            throw new Error(`Unsupported architechture ${process.arch}.`)
+    }
+
+    let platform: string
+    switch (process.platform) {
+        case 'linux':
+            platform = 'unknown-linux-gnu'
+            break
+        case 'darwin':
+            platform = 'apple-darwin'
+            break
+        case 'win32':
+            platform = 'pc-windows-msvc'
+            break
+        default:
+            throw new Error(`Unsupported platform ${process.platform}.`)
+    }
+
+    return `docrunner-${arch}-${platform}.zip`
 }
 
 export { installAndAddToPath }
