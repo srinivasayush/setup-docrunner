@@ -1,0 +1,24 @@
+name: Test Docrunner Action
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-docrunner-action:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2019, macOS-10.15]
+
+    name: Test docrunner action
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Docrunner
+        uses: ./
+
+      - name: Test Docrunner
+        run: docrunner --version

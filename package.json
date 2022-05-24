@@ -2,9 +2,9 @@
   "name": "docrunner-action",
   "version": "0.0.1",
   "description": "Installs the docrunner cli tool on your github hosted runner",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "build": "npx tsc -p . && npx ncc build build/index.js --license LICENSE",
+    "build": "tsc -p . && ncc build build/main.js -o dist --license LICENSE",
     "start": "node dist/index.js"
   },
   "keywords": [],
@@ -18,8 +18,6 @@
   },
   "devDependencies": {
     "@types/node": "^16.4.13",
-    "@types/node-fetch": "^2.5.12",
-    "@vercel/ncc": "^0.29.0",
-    "typescript": "^4.3.5"
+    "@types/node-fetch": "^2.5.12"
   }
 }
